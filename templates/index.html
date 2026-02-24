@@ -1,1 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StegSecure Glass Cyber</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
 
+    <!-- Matrix fon – eng birinchi va fixed -->
+    <div class="matrix-bg">
+        <canvas id="matrix-canvas"></canvas>
+    </div>
+
+    <div class="content-wrapper">
+
+        <header>
+            <h1>STE GSECURE</h1>
+            <p class="subtitle">GLASS CYBER • LSB STEGANOGRAPHY ENGINE</p>
+        </header>
+
+        <div class="glass-container">
+            <!-- Navigation Tabs -->
+            <div class="tabs">
+                <button class="tab-btn active" onclick="switchTab(0)">IMAGE STEGO</button>
+                <button class="tab-btn" onclick="switchTab(1)">AUDIO STEGO</button>
+            </div>
+
+            <!-- IMAGE TAB -->
+            <div id="image-tab" class="tab-content active">
+                <div class="sub-tabs">
+                    <button class="sub-tab-btn active" onclick="switchSubTab(0)">EMBED</button>
+                    <button class="sub-tab-btn" onclick="switchSubTab(1)">EXTRACT</button>
+                </div>
+
+                <div id="image-embed-panel" class="panel active">
+                    <div class="upload-area" id="image-upload-area">
+                        <input type="file" id="image-upload" accept="image/png,image/jpeg" hidden>
+                        <div class="upload-prompt">
+                            <span class="cyber-icon">📸</span>
+                            <p>DRAG & DROP IMAGE OR CLICK TO SELECT<br><small>PNG / JPG / JPEG • Max 16MB</small></p>
+                        </div>
+                    </div>
+                    <div class="file-info" id="image-file-info"></div>
+
+                    <textarea id="image-secret" class="cyber-textarea" placeholder="ENTER SECRET MESSAGE (UTF-8)"></textarea>
+
+                    <button class="cyber-btn" onclick="embedImage()">HIDE IN LSB • ENGAGE MATRIX</button>
+
+                    <div id="image-embed-result" class="terminal"></div>
+                </div>
+
+                <div id="image-extract-panel" class="panel">
+                    <div class="upload-area" id="image-extract-area">
+                        <input type="file" id="image-extract-upload" accept="image/png,image/jpeg" hidden>
+                        <div class="upload-prompt">
+                            <span class="cyber-icon">🔍</span>
+                            <p>DRAG & DROP STEGO IMAGE<br><small>PNG / JPG / JPEG</small></p>
+                        </div>
+                    </div>
+                    <div class="file-info" id="image-extract-file-info"></div>
+
+                    <button class="cyber-btn" onclick="extractImage()">EXTRACT FROM IMAGE • DECODE LSB</button>
+
+                    <div id="image-extract-result" class="terminal"></div>
+                </div>
+            </div>
+
+            <!-- AUDIO TAB -->
+            <div id="audio-tab" class="tab-content">
+                <div class="sub-tabs">
+                    <button class="sub-tab-btn active" onclick="switchSubTab(2)">EMBED</button>
+                    <button class="sub-tab-btn" onclick="switchSubTab(3)">EXTRACT</button>
+                </div>
+
+                <div id="audio-embed-panel" class="panel active">
+                    <div class="upload-area" id="audio-upload-area">
+                        <input type="file" id="audio-upload" accept="audio/wav" hidden>
+                        <div class="upload-prompt">
+                            <span class="cyber-icon">🎙️</span>
+                            <p>DRAG & DROP WAV FILE<br><small>Mono 16-bit PCM only • Max 16MB</small></p>
+                        </div>
+                    </div>
+                    <div class="file-info" id="audio-file-info"></div>
+
+                    <textarea id="audio-secret" class="cyber-textarea" placeholder="ENTER SECRET MESSAGE"></textarea>
+
+                    <button class="cyber-btn" onclick="embedAudio()">HIDE IN AUDIO • LSB WAVE</button>
+
+                    <div id="audio-embed-result" class="terminal"></div>
+                </div>
+
+                <div id="audio-extract-panel" class="panel">
+                    <div class="upload-area" id="audio-extract-area">
+                        <input type="file" id="audio-extract-upload" accept="audio/wav" hidden>
+                        <div class="upload-prompt">
+                            <span class="cyber-icon">🔍</span>
+                            <p>DRAG & DROP STEGO WAV<br><small>Mono 16-bit</small></p>
+                        </div>
+                    </div>
+                    <div class="file-info" id="audio-extract-file-info"></div>
+
+                    <button class="cyber-btn" onclick="extractAudio()">EXTRACT FROM AUDIO • DECODE LSB</button>
+
+                    <div id="audio-extract-result" class="terminal"></div>
+                </div>
+            </div>
+
+            <div class="footer-note">
+                StegSecure Glass Cyber v1.0 • Professional LSB Steganography • Zero Metadata Leak • Render Ready
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ====================== MATRIX RAIN ======================
+        const canvas = document.getElementById('matrix-canvas');
+        const ctx = canvas.getContext('2d');
+        let width, height;
+        let drops = [];
+        const fontSize = 16;
+        const chars = "01アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワンABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+
+        function resizeCanvas() {
+            width = canvas.width = window.innerWidth;
+            height = canvas.height = window.innerHeight;
+
+            const columns = Math.floor(width / fontSize);
+            drops = Array(columns).fill(1);
+        }
+
+        function drawMatrix() {
+            ctx.fillStyle = 'rgba(13, 0, 26, 0.08)';
+            ctx.fillRect(0, 0, width, height);
+
+            ctx.fillStyle = '#00f9ff';
+            ctx.font = fontSize + 'px monospace';
+
+            for (let i = 0; i < drops.length; i++) {
+                const text = chars[Math.floor(Math.random() * chars.length)];
+                ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+
+                if (drops[i] * fontSize > height && Math.random() > 0.975) {
+                    drops[i] = 0;
+                }
+                drops[i]++;
+            }
+        }
+
+        // Har 35-45 ms da yangilash (silliqroq ko‘rinish)
+        function animate() {
+            drawMatrix();
+            requestAnimationFrame(animate);
+        }
+
+        window.addEventListener('resize', resizeCanvas);
+        window.addEventListener('orientationchange', resizeCanvas);
+
+        resizeCanvas();
+        animate();  // requestAnimationFrame bilan silliq animatsiya
+
+        // Qolgan JavaScript kodlari (tablar, drag-drop, fetch lar) o‘zgarmagan holda qoladi
+        // ... (oldin yozgan embedImage, extractImage, switchTab va hokazo funksiyalarni shu yerga joylashtiring yoki o‘zgartirmasdan qoldiring)
+
+        // Misol uchun oldingi kodlaringizdan qisqa nusxa:
+        function switchTab(n) { /* ... */ }
+        function switchSubTab(n) { /* ... */ }
+        // va hokazo – ularni shu yerga joylashtirishingiz mumkin
+    </script>
+</body>
+</html>
